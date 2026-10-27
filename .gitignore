@@ -1,0 +1,39 @@
+# macOS
+.DS_Store
+.AppleDouble
+
+# Build products and local verification artifacts
+Build/
+build/
+.build/
+DerivedData/
+Verification/
+*.xcresult/
+*.xcarchive/
+*.dSYM/
+*.ipa
+*.log
+
+# Xcode user-specific settings
+xcuserdata/
+*.xcuserstate
+*.xccheckout
+*.xcscmblueprint
+*.moved-aside
+
+# Local configuration and signing credentials
+.env
+.env.*
+!.env.example
+*.p12
+*.p8
+*.pem
+*.key
+*.mobileprovision
+*.provisionprofile
+
+# Local source inventory
+preview-assets-manifest.json
+
+# Local-only preview media
+/JumpJump/PreviewAssets/

@@ -1,0 +1,46 @@
+// !$*UTF8*$!
+{ archiveVersion = 1; classes = {}; objectVersion = 56; objects = {
+7508EF28938C079BDC9AE35F = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+A39EF5AF6A1BEA9942DDDFF2 = { isa = PBXBuildFile; fileRef = 7508EF28938C079BDC9AE35F; };
+178867000DA71A0107449D89 = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameViewController.swift; sourceTree = "<group>"; };
+0A8F5F2CB04B1F7714F7B404 = { isa = PBXBuildFile; fileRef = 178867000DA71A0107449D89; };
+093A1D30AD4D545465DD23E4 = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameRenderer.swift; sourceTree = "<group>"; };
+9919B31B5BE4D4EE148C1D28 = { isa = PBXBuildFile; fileRef = 093A1D30AD4D545465DD23E4; };
+64D0A8FC1191C20E14D49D5E = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameLogic.swift; sourceTree = "<group>"; };
+C2B828D7AC4EA38D5EDB3682 = { isa = PBXBuildFile; fileRef = 64D0A8FC1191C20E14D49D5E; };
+95E5CF18FA0A6E922C59D98B = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssetLibrary.swift; sourceTree = "<group>"; };
+7C77C9AB25404BE16C5FF3B8 = { isa = PBXBuildFile; fileRef = 95E5CF18FA0A6E922C59D98B; };
+0189424A5A60FED329FA868E = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameAudio.swift; sourceTree = "<group>"; };
+8E2BC9944DFD1BADD2E26952 = { isa = PBXBuildFile; fileRef = 0189424A5A60FED329FA868E; };
+AB10C0000000000000000001 = { isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+AB10C0000000000000000002 = { isa = PBXBuildFile; fileRef = AB10C0000000000000000001; };
+59BD0A3FF43B32849B319E64 = { isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+38A007151ABE87CC01A5B6E9 = { isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = JumpJump.app; sourceTree = BUILT_PRODUCTS_DIR; };
+3A2A88DEEFF3D1D23E496597 = { isa = PBXGroup; children = (7508EF28938C079BDC9AE35F,178867000DA71A0107449D89,093A1D30AD4D545465DD23E4,64D0A8FC1191C20E14D49D5E,95E5CF18FA0A6E922C59D98B,0189424A5A60FED329FA868E,AB10C0000000000000000001,59BD0A3FF43B32849B319E64,); path = JumpJump; sourceTree = "<group>"; };
+FBDC4F23F93125BBEEAE800C = { isa = PBXGroup; children = (38A007151ABE87CC01A5B6E9,AA0000000000000000000003,); name = Products; sourceTree = "<group>"; };
+B28B7AF69320201D1CF206EB = { isa = PBXGroup; children = (3A2A88DEEFF3D1D23E496597,AA0000000000000000000004,FBDC4F23F93125BBEEAE800C,); sourceTree = "<group>"; };
+BCE16DD0260827ECF338C787 = { isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (A39EF5AF6A1BEA9942DDDFF2,0A8F5F2CB04B1F7714F7B404,9919B31B5BE4D4EE148C1D28,C2B828D7AC4EA38D5EDB3682,7C77C9AB25404BE16C5FF3B8,8E2BC9944DFD1BADD2E26952,); runOnlyForDeploymentPostprocessing = 0; };
+ECE2D868E17AEF81A05610A3 = { isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (AB10C0000000000000000002,); runOnlyForDeploymentPostprocessing = 0; };
+7561BFB015D8F536760CB671 = { isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
+89E1FD6268CC0F221A2BE178 = { isa = XCBuildConfiguration; buildSettings = { CLANG_ENABLE_MODULES = YES; SDKROOT = iphoneos; IPHONEOS_DEPLOYMENT_TARGET = 18.0; SWIFT_VERSION = 5.0; }; name = Debug; };
+E6DE6C99132752C914FEF632 = { isa = XCBuildConfiguration; buildSettings = { CLANG_ENABLE_MODULES = YES; SDKROOT = iphoneos; IPHONEOS_DEPLOYMENT_TARGET = 18.0; SWIFT_VERSION = 5.0; }; name = Release; };
+862894B703A6DEDF96A9DD6C = { isa = XCConfigurationList; buildConfigurations = (89E1FD6268CC0F221A2BE178,E6DE6C99132752C914FEF632,); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
+7082CC0B6FC1282FCEABD07A = { isa = XCBuildConfiguration; buildSettings = { ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon; PRODUCT_NAME = "$(TARGET_NAME)"; PRODUCT_BUNDLE_IDENTIFIER = com.example.JumpJump; INFOPLIST_FILE = JumpJump/Info.plist; GENERATE_INFOPLIST_FILE = NO; CODE_SIGN_STYLE = Automatic; TARGETED_DEVICE_FAMILY = 1; SUPPORTED_PLATFORMS = "iphoneos iphonesimulator"; SWIFT_VERSION = 5.0; SWIFT_STRICT_CONCURRENCY = minimal; SWIFT_OPTIMIZATION_LEVEL = "-Onone"; SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)"; }; name = Debug; };
+639A7CA24D39909E713B47F7 = { isa = XCBuildConfiguration; buildSettings = { ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon; PRODUCT_NAME = "$(TARGET_NAME)"; PRODUCT_BUNDLE_IDENTIFIER = com.example.JumpJump; INFOPLIST_FILE = JumpJump/Info.plist; GENERATE_INFOPLIST_FILE = NO; CODE_SIGN_STYLE = Automatic; TARGETED_DEVICE_FAMILY = 1; SUPPORTED_PLATFORMS = "iphoneos iphonesimulator"; SWIFT_VERSION = 5.0; SWIFT_STRICT_CONCURRENCY = minimal; SWIFT_OPTIMIZATION_LEVEL = "-O"; }; name = Release; };
+C57128001CE614BF8549D6BB = { isa = XCConfigurationList; buildConfigurations = (7082CC0B6FC1282FCEABD07A,639A7CA24D39909E713B47F7,); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
+0E8A3AD980EC179856012B7E = { isa = PBXNativeTarget; buildConfigurationList = C57128001CE614BF8549D6BB; buildPhases = (BCE16DD0260827ECF338C787,7561BFB015D8F536760CB671,ECE2D868E17AEF81A05610A3,); buildRules = (); dependencies = (); name = JumpJump; productName = JumpJump; productReference = 38A007151ABE87CC01A5B6E9; productType = "com.apple.product-type.application"; };
+98F54143AB4E86B28C3AFEE0 = { isa = PBXProject; attributes = { BuildIndependentTargetsInParallel = YES; LastUpgradeCheck = 2600; TargetAttributes = { AA000000000000000000000D = { CreatedOnToolsVersion = 26.0; TestTargetID = 0E8A3AD980EC179856012B7E; }; }; }; buildConfigurationList = 862894B703A6DEDF96A9DD6C; compatibilityVersion = "Xcode 14.0"; developmentRegion = zh_CN; hasScannedForEncodings = 0; knownRegions = (zh_CN,en,Base,); mainGroup = B28B7AF69320201D1CF206EB; productRefGroup = FBDC4F23F93125BBEEAE800C; projectDirPath = ""; projectRoot = ""; targets = (0E8A3AD980EC179856012B7E,AA000000000000000000000D,); };
+AA0000000000000000000001 = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JumpJumpUITests.swift; sourceTree = "<group>"; };
+AA0000000000000000000002 = { isa = PBXBuildFile; fileRef = AA0000000000000000000001; };
+AA0000000000000000000003 = { isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = JumpJumpUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+AA0000000000000000000004 = { isa = PBXGroup; children = (AA0000000000000000000001,); path = JumpJumpUITests; sourceTree = "<group>"; };
+AA0000000000000000000005 = { isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (AA0000000000000000000002,); runOnlyForDeploymentPostprocessing = 0; };
+AA0000000000000000000006 = { isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
+AA0000000000000000000007 = { isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
+AA0000000000000000000008 = { isa = PBXContainerItemProxy; containerPortal = 98F54143AB4E86B28C3AFEE0; proxyType = 1; remoteGlobalIDString = 0E8A3AD980EC179856012B7E; remoteInfo = JumpJump; };
+AA0000000000000000000009 = { isa = PBXTargetDependency; target = 0E8A3AD980EC179856012B7E; targetProxy = AA0000000000000000000008; };
+AA000000000000000000000A = { isa = XCBuildConfiguration; buildSettings = { PRODUCT_NAME = "$(TARGET_NAME)"; PRODUCT_BUNDLE_IDENTIFIER = com.example.JumpJumpUITests; GENERATE_INFOPLIST_FILE = YES; CODE_SIGN_STYLE = Automatic; TARGETED_DEVICE_FAMILY = 1; SUPPORTED_PLATFORMS = "iphoneos iphonesimulator"; IPHONEOS_DEPLOYMENT_TARGET = 18.0; SWIFT_VERSION = 5.0; SWIFT_OPTIMIZATION_LEVEL = "-Onone"; SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)"; TEST_TARGET_NAME = JumpJump; }; name = Debug; };
+AA000000000000000000000B = { isa = XCBuildConfiguration; buildSettings = { PRODUCT_NAME = "$(TARGET_NAME)"; PRODUCT_BUNDLE_IDENTIFIER = com.example.JumpJumpUITests; GENERATE_INFOPLIST_FILE = YES; CODE_SIGN_STYLE = Automatic; TARGETED_DEVICE_FAMILY = 1; SUPPORTED_PLATFORMS = "iphoneos iphonesimulator"; IPHONEOS_DEPLOYMENT_TARGET = 18.0; SWIFT_VERSION = 5.0; SWIFT_OPTIMIZATION_LEVEL = "-O"; TEST_TARGET_NAME = JumpJump; }; name = Release; };
+AA000000000000000000000C = { isa = XCConfigurationList; buildConfigurations = (AA000000000000000000000A,AA000000000000000000000B,); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
+AA000000000000000000000D = { isa = PBXNativeTarget; buildConfigurationList = AA000000000000000000000C; buildPhases = (AA0000000000000000000005,AA0000000000000000000006,AA0000000000000000000007,); buildRules = (); dependencies = (AA0000000000000000000009,); name = JumpJumpUITests; productName = JumpJumpUITests; productReference = AA0000000000000000000003; productType = "com.apple.product-type.bundle.ui-testing"; };
+}; rootObject = 98F54143AB4E86B28C3AFEE0; }

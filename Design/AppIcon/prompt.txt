@@ -1,0 +1,12 @@
+Generated with the built-in image_gen tool.
+
+Use case: stylized-concept
+Asset type: production iOS app icon, single square 1024 x 1024 artwork.
+Primary request: Design a beautiful original icon for JumpJump, a calm minimalist isometric platform-hopping mobile game. The icon must immediately convey one small game pawn jumping from one block to another.
+Scene/backdrop: edge-to-edge opaque warm ivory background (#E8E5DF), very subtle soft studio illumination.
+Subject: One large, iconic geometric game pawn airborne in the center, leaning slightly forward toward the upper right. The pawn has a simple tall charcoal cylinder body (#343946), a short narrow neck, a warm sand spherical head (#E3B787), and a flat small charcoal cylindrical cap. No face, no arms, no legs. Preserve this recognisable abstract silhouette. Underneath are exactly two chunky isometric square platforms, separated by a visible gap: a larger mint-green cube (#73B6A0) in the lower left, and a warm sand cube in the middle right, with a subtle mint landing disc on its top. The pawn is clearly above the gap, in mid-jump, with a short restrained curved mint motion stroke behind it to suggest an upward arc.
+Style/medium: refined minimal 3D game art, tactile matte clay surfaces, clean precise geometry, gently softened edges, soft ambient occlusion and restrained shadows; delightful yet sophisticated. Simple bold volumes rather than tiny details.
+Composition/framing: strong compact diagonal composition, orthographic isometric view; pawn is the hero and occupies roughly 45 percent of the image height; the complete two-platform composition fills approximately 80 percent of the square, centered, with a comfortable safe margin. Clear separation between shapes, excellent readability at 60 pixels.
+Lighting/mood: warm soft directional light from upper left, cheerful, quiet, playful.
+Color palette: warm ivory, mint green, deep blue charcoal, warm sand. Cohesive with the game scene.
+Constraints: Exactly ONE pawn, exactly TWO platforms. Square full-bleed opaque artwork. No baked-in rounded icon corners, no outer frame, no extra border, no icon mockup, no letters, no words, no numbers, no watermark, no logo, no extra objects, no UI. Avoid glossy plastic, busy texture, photorealism, tiny decorative elements.
