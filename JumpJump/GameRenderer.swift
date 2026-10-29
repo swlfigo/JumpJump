@@ -16,6 +16,7 @@ final class GameRenderer {
     private var updateSubscription: Cancellable?
     private var generator = PlatformGenerator(seed: 1)
     private var platforms: [(PlatformSpec, Entity)] = []
+    private var platformBase = 0 // absolute course index of platforms[0]
     private var currentIndex = 0
     private var trajectory: JumpTrajectory?
     private var elapsed: Float = 0
@@ -49,6 +50,19 @@ final class GameRenderer {
     var onCharge: ((Float) -> Void)?
     var isPaused = false
 
+    // Online racing: presses are whole milliseconds so the local prediction
+    // replays exactly what the server computes; remote racers share the course.
+    var isOnline = false
+    var isInputLocked = false
+    var revealsIdealPress = true // off in online races: the ideal press is the assist
+    private var remotes: [Int: RemoteAvatar] = [:]
+    private var settleWaiter: (completion: () -> Void, quiet: Float, waited: Float)?
+    private let selfMarker = ModelEntity()
+    private var selfColor: UIColor?
+    var onChargeBegan: ((Int) -> Void)?
+    var onJumpReleased: ((_ seq: Int, _ pressMs: Int, _ landing: SIMD2<Float>) -> Void)?
+    var onRemoteLabels: (([RemoteLabel]) -> Void)?
+
     init(view: ARView) {
         self.view = view
         view.environment.background = .color(UIColor(hex: 0xE8E5DF))
@@ -74,30 +88,34 @@ final class GameRenderer {
         }
     }
 
+    // Online the piece wears the color the server assigned; nil is the
+    // classic single-player charcoal.
+    func setSelfColor(_ color: UIColor?) {
+        guard color != selfColor else { return }
+        selfColor = color
+        visual.children.removeAll()
+        Figure.build(into: visual, body: color ?? UIColor(hex: 0x343946), cap: color ?? UIColor(hex: 0x303440))
+    }
+
     private func buildCharacter() {
         character.addChild(visual)
-        let body = ModelEntity(mesh: .generateCylinder(height: 0.31, radius: 0.105),
-                               materials: [SimpleMaterial(color: UIColor(hex: 0x343946), roughness: 0.8, isMetallic: false)])
-        body.position.y = 0.155
-        visual.addChild(body)
-        let neck = ModelEntity(mesh: .generateCylinder(height: 0.07, radius: 0.055),
-                               materials: [SimpleMaterial(color: UIColor(hex: 0x343946), roughness: 0.8, isMetallic: false)])
-        neck.position.y = 0.34
-        visual.addChild(neck)
-        let head = ModelEntity(mesh: .generateSphere(radius: 0.095),
-                               materials: [SimpleMaterial(color: UIColor(hex: 0xE3B787), roughness: 0.65, isMetallic: false)])
-        head.position.y = 0.445
-        visual.addChild(head)
-        let cap = ModelEntity(mesh: .generateCylinder(height: 0.06, radius: 0.092),
-                              materials: [SimpleMaterial(color: UIColor(hex: 0x303440), roughness: 0.8, isMetallic: false)])
-        cap.position.y = 0.51
-        visual.addChild(cap)
+        Figure.build(into: visual, body: UIColor(hex: 0x343946), cap: UIColor(hex: 0x303440))
+        // Online only: a downward arrow above the head marks "you" in a crowd.
+        selfMarker.model = ModelComponent(mesh: .generateCone(height: 0.14, radius: 0.07),
+                                          materials: [UnlitMaterial(color: UIColor(hex: 0xF29B38))])
+        selfMarker.orientation = simd_quatf(angle: .pi, axis: SIMD3(1, 0, 0))
+        selfMarker.position.y = 0.78
+        selfMarker.isEnabled = false
+        character.addChild(selfMarker)
     }
 
     func restart(seed: Int? = nil) {
         assets.stopAll()
         platforms.forEach { $0.1.removeFromParent() }
-        platforms.removeAll()
+        platforms.removeAll(); platformBase = 0
+        clearRemotes()
+        settleWaiter = nil
+        selfMarker.isEnabled = isOnline
         arrivingPlatforms.removeAll(); arrivalsStarted.removeAll()
         floatingScore = nil; scorePops = 0; nextMinScale = 1
         onFloatingScore?(nil, 0, 0)
@@ -164,20 +182,24 @@ final class GameRenderer {
     }
 
     func beginCharge() {
-        guard phase == .ready, !isPaused else { return }
+        guard phase == .ready, !isPaused, !isInputLocked else { return }
         phase = .charging
         chargeStarted = CACurrentMediaTime()
         hasPlayedChargeLoop = false
         currentCharge = 0
         onMessage?("")
         publishDiagnostics()
+        if isOnline { onChargeBegan?(jumpCount + 1) }
         assets.play("scale_intro")
         UIImpactFeedbackGenerator(style: .soft).prepare()
     }
     func releaseCharge() {
         // No minimum duration and no progress threshold: every valid release jumps.
         guard phase == .charging, !isPaused else { return }
-        let press = max(0, Float(CACurrentMediaTime() - chargeStarted))
+        var press = max(0, Float(CACurrentMediaTime() - chargeStarted))
+        // The server replays whole milliseconds (0...3000); predict with exactly that.
+        let pressMs = min(Int((press * 1000).rounded()), 3000)
+        if isOnline { press = Float(pressMs) / 1000 }
         lastPress = press
         jumpCount += 1
         maximumJumpHeight = 0
@@ -185,6 +207,7 @@ final class GameRenderer {
         assets.stop("scale_intro"); assets.stop("scale_loop")
         let next = platforms[currentIndex + 1].0
         trajectory = JumpTrajectory(start: character.position, target: next.center, pressSeconds: press)
+        if isOnline, let trajectory { onJumpReleased?(jumpCount, pressMs, trajectory.landing) }
         elapsed = 0
         visual.scale = .one
         platforms[currentIndex].1.scale = .one
@@ -208,10 +231,35 @@ final class GameRenderer {
     private func update(delta: Float) {
         guard !isPaused else { return }
         let dt = min(delta, 1.0 / 15)
+        remotes.values.forEach { $0.update(delta: dt) }
+        // Once out of an online match, spectate whoever is furthest ahead; when
+        // the last racer misses, follow their fall to the end.
+        if isOnline, phase == .gameOver {
+            if let leader = remotes.values.filter({ !$0.isOut }).max(by: { $0.index < $1.index }) {
+                desiredCameraTarget = midpoint(ensurePlatform(leader.index), ensurePlatform(leader.index + 1))
+            } else if let falling = remotes.values.first(where: { $0.isInMotion }) {
+                desiredCameraTarget = SIMD3(falling.position.x, 0.1, falling.position.z)
+            }
+        }
         cameraTarget += (desiredCameraTarget - cameraTarget) * (1 - exp(-dt * 5))
         updateCamera()
         updateArrivals(delta: dt)
         updateFloatingScore(delta: dt)
+        if isOnline {
+            onRemoteLabels?(remotes.values.map { avatar in
+                RemoteLabel(id: avatar.id, name: avatar.name, color: avatar.color, point: avatar.isVisible ? view.project(avatar.labelAnchor) : nil)
+            })
+        }
+        if var waiter = settleWaiter {
+            waiter.waited += dt
+            waiter.quiet = racersInMotion ? 0 : waiter.quiet + dt
+            if waiter.quiet >= 0.4 || waiter.waited >= 4 {
+                settleWaiter = nil
+                waiter.completion()
+            } else {
+                settleWaiter = waiter
+            }
+        }
         if let ring {
             ringAge += dt
             let size = 1 + ringAge * 3
@@ -316,7 +364,10 @@ final class GameRenderer {
         let scale = min(next.1.scale.x, min(next.1.scale.y, next.1.scale.z))
         nextMinScale = min(nextMinScale, scale)
         let base = String(format: "phase=%@;jumps=%d;lastPress=%.3f;maxHeight=%.3f;charge=%.3f", String(describing: phase), jumpCount, lastPress, maximumJumpHeight, currentCharge)
-        let animation = String(format: ";nextID=%d;arrivals=%d;nextY=%.3f;nextScale=%.3f;nextMinScale=%.3f;idealPress=%.5f;scorePops=%d;popupVisible=%d", next.0.id, arrivalsStarted.count, next.1.position.y, scale, nextMinScale, idealPress, scorePops, floatingScore == nil ? 0 : 1)
+        let ideal = revealsIdealPress ? String(format: ";idealPress=%.5f", idealPress) : ""
+        let animation = String(format: ";nextID=%d;arrivals=%d;nextY=%.3f;nextScale=%.3f;nextMinScale=%.3f", next.0.id, arrivalsStarted.count, next.1.position.y, scale, nextMinScale)
+            + ideal + String(format: ";scorePops=%d;popupVisible=%d", scorePops, floatingScore == nil ? 0 : 1)
+            + (isOnline ? ";racersMoving=\(racersInMotion ? 1 : 0)" : "")
         onDiagnostics?(base + animation)
     }
 
@@ -329,11 +380,9 @@ final class GameRenderer {
             let perfect = result == .perfect
             if perfect { combo += 1; score += combo * 2 } else { combo = 0; score += 1 }
             currentIndex += 1
-            let next = generator.next(after: platforms[currentIndex].0, score: score)
-            let entity = makePlatform(next)
-            world.addChild(entity); platforms.append((next, entity))
+            // Online, a racer ahead may already have revealed this platform.
+            let next = ensurePlatform(platformBase + currentIndex + 1)
             nextMinScale = 1
-            startArrival(for: next, entity: entity)
             updateIdealPress()
             desiredCameraTarget = midpoint(platforms[currentIndex].0, next)
             if perfect { showRing(at: character.position); assets.play("combo\(min(combo, 8))") }
@@ -344,7 +393,7 @@ final class GameRenderer {
             updateFloatingScore(delta: 0)
             onMessage?("")
             UIImpactFeedbackGenerator(style: perfect ? .medium : .light).impactOccurred()
-            if currentIndex > 4 { platforms.removeFirst().1.removeFromParent(); currentIndex -= 1 }
+            trimPlatforms()
             elapsed = 0; phase = .settling
         case .stayed:
             updateIdealPress()
@@ -356,6 +405,57 @@ final class GameRenderer {
             assets.play("fall")
             UINotificationFeedbackGenerator().notificationOccurred(.error)
         }
+    }
+
+    // Platforms are generated in course order, so everyone who shares the seed
+    // sees the same course; new ones drop in with the arrival bounce.
+    @discardableResult
+    private func ensurePlatform(_ absolute: Int) -> PlatformSpec {
+        while platformBase + platforms.count <= absolute {
+            let spec = generator.next(after: platforms[platforms.count - 1].0, score: score)
+            let entity = makePlatform(spec)
+            world.addChild(entity); platforms.append((spec, entity))
+            startArrival(for: spec, entity: entity)
+        }
+        return platforms[absolute - platformBase].0
+    }
+
+    // Keep the platforms anyone still racing stands on, plus four behind them.
+    private func trimPlatforms() {
+        let lowest = remotes.values.filter { !$0.isOut }.map(\.index).reduce(platformBase + currentIndex, min)
+        while platformBase + 4 < lowest {
+            platforms.removeFirst().1.removeFromParent()
+            platformBase += 1; currentIndex -= 1
+        }
+    }
+
+    func addRemote(id: Int, name: String, color: UIColor) {
+        let avatar = RemoteAvatar(id: id, name: name, color: color)
+        remotes[id] = avatar
+        world.addChild(avatar.root); world.addChild(avatar.shadow)
+    }
+    func remoteCharged(id: Int) { remotes[id]?.charge() }
+    func remoteJumped(id: Int, pressMs: Int, landing: SIMD2<Float>, result: LandingResult) {
+        guard let avatar = remotes[id] else { return }
+        avatar.jump(pressMs: pressMs, landing: landing, result: result, target: ensurePlatform(avatar.index + 1).center)
+        if !avatar.isOut { ensurePlatform(avatar.index + 1) }
+        trimPlatforms()
+    }
+    func removeRemote(id: Int) { remotes[id]?.remove() }
+
+    private var racersInMotion: Bool {
+        phase == .jumping || phase == .falling || remotes.values.contains { $0.isInMotion }
+    }
+
+    // Runs `completion` once nobody is mid-jump or falling and the scene has
+    // been still for a moment, so a match result never cuts off the last fall.
+    func afterRacersSettle(_ completion: @escaping () -> Void) {
+        settleWaiter = (completion, 0, 0)
+    }
+    func clearRemotes() {
+        remotes.values.forEach { $0.root.removeFromParent(); $0.shadow.removeFromParent() }
+        remotes.removeAll()
+        onRemoteLabels?([])
     }
 
     private func showRing(at position: SIMD3<Float>) {

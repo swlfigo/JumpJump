@@ -58,7 +58,9 @@ struct JumpTrajectory {
     init(start: SIMD3<Float>, target: SIMD2<Float>, pressSeconds: Float) {
         self.start = start
         let delta = target - SIMD2(start.x, start.z)
-        direction = simd_length_squared(delta) > 0.000001 ? simd_normalize(delta) : SIMD2(1, 0)
+        // Divide by the correctly rounded length: simd_normalize uses an ARM
+        // rsqrt estimate that the Go server cannot reproduce bit-for-bit.
+        direction = simd_length_squared(delta) > 0.000001 ? delta / simd_length(delta) : SIMD2(1, 0)
         let press = max(0, min(pressSeconds, 3))
         horizontalSpeed = min(press * 7, 15)
         verticalSpeed = min(13.5 + press * 1.5, 18)
